@@ -1,0 +1,33 @@
+{
+	"name": "@paylike/client",
+	"version": "0.1.0",
+	"scripts": {
+		"test": "node test"
+	},
+	"dependencies": {
+		"@paylike/request": "^2.0.0",
+		"logino": "^2.1.0"
+	},
+	"devDependencies": {
+		"tape": "^5.2.2"
+	},
+	"prettier": {
+		"semi": false,
+		"singleQuote": true,
+		"useTabs": true,
+		"bracketSpacing": false,
+		"trailingComma": "es5",
+		"tabWidth": 4,
+		"proseWrap": "always",
+		"printWidth": 80,
+		"overrides": [
+			{
+				"files": "*.md",
+				"options": {
+					"useTabs": false,
+					"tabWidth": 2
+				}
+			}
+		]
+	}
+}

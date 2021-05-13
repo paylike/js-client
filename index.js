@@ -8,7 +8,6 @@ let counter = 0
 
 module.exports = (opts = {}) => {
 	const {
-		hosts = {api: 'b.paylike.io', vault: 'vault.paylike.io'},
 		clientId = defaultClientId,
 		log = () => undefined,
 		request = orequest,
@@ -19,6 +18,10 @@ module.exports = (opts = {}) => {
 		},
 		retryAfter = defaultRetryAfter,
 	} = opts
+	const hosts = {
+		api: (opts.hosts && opts.hosts.api) || 'b.paylike.io',
+		vault: (opts.hosts && opts.hosts.vault) || 'vault.paylike.io',
+	}
 	const defaults = {
 		log,
 		fetch: opts.fetch,

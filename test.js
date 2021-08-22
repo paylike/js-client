@@ -142,6 +142,136 @@ test('custom "retryAfter"', (t) => {
 	clock.increase(200_000)
 })
 
+test('logging', (t) => {
+	t.plan(4)
+
+	let count = 0
+	const logsA = []
+	const logsB = []
+	const clock = createClock(() => undefined, 1000000)
+	const err = new Error('test')
+	const server = createServer({
+		clock,
+		fetch: () => {
+			if (count++ < 2) {
+				return Promise.reject(err)
+			} else {
+				return Promise.resolve({
+					status: 204,
+					statusText: 'OK',
+					headers: new Map([['content-type', 'application/json']]),
+				})
+			}
+		},
+		log: (l) => logsA.push(l),
+	})
+	const a = server.tokenize('abc', 'cba').then(() => {
+		const id = logsA[0][0]
+		t.ok(id, Number.isInteger(id))
+		t.deepEqual(logsA, [
+			[
+				id,
+				{
+					t: 'request',
+					method: 'POST',
+					url: 'https://vault.paylike.io',
+					timeout: 10000,
+				},
+			],
+			[
+				id,
+				{
+					t: 'aborted',
+					abort: err,
+				},
+			],
+			[
+				id,
+				{
+					t: 'request failed',
+					attempts: 1,
+					retryAfter: 0,
+					err: err,
+				},
+			],
+			[
+				id,
+				{
+					t: 'request',
+					method: 'POST',
+					url: 'https://vault.paylike.io',
+					timeout: 10000,
+				},
+			],
+			[
+				id,
+				{
+					t: 'response',
+					status: 204,
+					statusText: 'OK',
+					requestId: undefined,
+				},
+			],
+			[id, 'closing stream'],
+		])
+	})
+	const b = server
+		.tokenize('abc', 'cba', {log: (l) => logsB.push(l)})
+		.then(() => {
+			const id = logsB[0][0]
+			t.deepEqual(logsB, [
+				[
+					id,
+					{
+						t: 'request',
+						method: 'POST',
+						url: 'https://vault.paylike.io',
+						timeout: 10000,
+					},
+				],
+				[
+					id,
+					{
+						t: 'aborted',
+						abort: err,
+					},
+				],
+				[
+					id,
+					{
+						t: 'request failed',
+						attempts: 1,
+						retryAfter: 0,
+						err: err,
+					},
+				],
+				[
+					id,
+					{
+						t: 'request',
+						method: 'POST',
+						url: 'https://vault.paylike.io',
+						timeout: 10000,
+					},
+				],
+				[
+					id,
+					{
+						t: 'response',
+						status: 204,
+						statusText: 'OK',
+						requestId: undefined,
+					},
+				],
+				[id, 'closing stream'],
+			])
+		})
+	clock.increase(200_000)
+	Promise.all([a, b]).then(() =>
+		t.ok(logsA[0][0] !== logsB[0][0], 'logs are unique per request')
+	)
+})
+
 test('.tokenize', (t) => {
 	t.plan(3)
 	const logs = []

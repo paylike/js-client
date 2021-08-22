@@ -1,10 +1,9 @@
 'use strict'
 
-const logger = require('logino')
+const {serializeError} = require('serialize-error')
 const orequest = require('@paylike/request')
 
 const defaultClientId = `js-c-1`
-let counter = 0
 
 module.exports = (opts = {}) => {
 	const {
@@ -55,9 +54,7 @@ module.exports = (opts = {}) => {
 		},
 	}
 
-	function first(endpoint, {log: olog, retryAfter, ...opts}) {
-		const id = counter++
-		const log = logger(olog).create(id)
+	function first(endpoint, {log, retryAfter, ...opts}) {
 		return retry(
 			() => request(endpoint, {log, ...opts}).first(),
 			(err, attempts) => {
@@ -66,7 +63,7 @@ module.exports = (opts = {}) => {
 					t: 'request failed',
 					attempts,
 					retryAfter: shouldRetryAfter,
-					err,
+					err: serializeError(err),
 				})
 				return shouldRetryAfter
 			}

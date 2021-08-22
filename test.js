@@ -143,7 +143,7 @@ test('custom "retryAfter"', (t) => {
 })
 
 test('logging', (t) => {
-	t.plan(4)
+	t.plan(2)
 
 	let count = 0
 	const logsA = []
@@ -165,111 +165,75 @@ test('logging', (t) => {
 		},
 		log: (l) => logsA.push(l),
 	})
-	const a = server.tokenize('abc', 'cba').then(() => {
-		const id = logsA[0][0]
-		t.ok(id, Number.isInteger(id))
+	const a = server.tokenize('abc', 'cba').then(() =>
 		t.deepEqual(logsA, [
-			[
-				id,
+			{
+				t: 'request',
+				method: 'POST',
+				url: 'https://vault.paylike.io',
+				timeout: 10000,
+			},
+			{
+				t: 'aborted',
+				abort: {name: 'Error', message: 'test', stack: err.stack},
+			},
+			{
+				t: 'request failed',
+				attempts: 1,
+				retryAfter: 0,
+				err: {name: 'Error', message: 'test', stack: err.stack},
+			},
+			{
+				t: 'request',
+				method: 'POST',
+				url: 'https://vault.paylike.io',
+				timeout: 10000,
+			},
+			{
+				t: 'response',
+				status: 204,
+				statusText: 'OK',
+				requestId: undefined,
+			},
+			'closing stream',
+		])
+	)
+	const b = server
+		.tokenize('abc', 'cba', {log: (l) => logsB.push(l)})
+		.then(() =>
+			t.deepEqual(logsB, [
 				{
 					t: 'request',
 					method: 'POST',
 					url: 'https://vault.paylike.io',
 					timeout: 10000,
 				},
-			],
-			[
-				id,
 				{
 					t: 'aborted',
-					abort: err,
+					abort: {name: 'Error', message: 'test', stack: err.stack},
 				},
-			],
-			[
-				id,
 				{
 					t: 'request failed',
 					attempts: 1,
 					retryAfter: 0,
-					err: err,
+					err: {name: 'Error', message: 'test', stack: err.stack},
 				},
-			],
-			[
-				id,
 				{
 					t: 'request',
 					method: 'POST',
 					url: 'https://vault.paylike.io',
 					timeout: 10000,
 				},
-			],
-			[
-				id,
 				{
 					t: 'response',
 					status: 204,
 					statusText: 'OK',
 					requestId: undefined,
 				},
-			],
-			[id, 'closing stream'],
-		])
-	})
-	const b = server
-		.tokenize('abc', 'cba', {log: (l) => logsB.push(l)})
-		.then(() => {
-			const id = logsB[0][0]
-			t.deepEqual(logsB, [
-				[
-					id,
-					{
-						t: 'request',
-						method: 'POST',
-						url: 'https://vault.paylike.io',
-						timeout: 10000,
-					},
-				],
-				[
-					id,
-					{
-						t: 'aborted',
-						abort: err,
-					},
-				],
-				[
-					id,
-					{
-						t: 'request failed',
-						attempts: 1,
-						retryAfter: 0,
-						err: err,
-					},
-				],
-				[
-					id,
-					{
-						t: 'request',
-						method: 'POST',
-						url: 'https://vault.paylike.io',
-						timeout: 10000,
-					},
-				],
-				[
-					id,
-					{
-						t: 'response',
-						status: 204,
-						statusText: 'OK',
-						requestId: undefined,
-					},
-				],
-				[id, 'closing stream'],
+				'closing stream',
 			])
-		})
+		)
 	clock.increase(200_000)
-	Promise.all([a, b]).then(() =>
-		t.ok(logsA[0][0] !== logsB[0][0], 'logs are unique per request')
-	)
 })
 
 test('.tokenize', (t) => {

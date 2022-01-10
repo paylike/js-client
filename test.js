@@ -304,6 +304,53 @@ test('.payments.create with a challenge path', (t) => {
 		.then((r) => t.equal(r, 'foo'))
 })
 
+test('.applepay.tokenize', (t) => {
+	t.plan(3)
+	const logs = []
+	const server = createServer({
+		request: (endpoint, {log, clock, fetch, ...opts}) => {
+			t.equal(endpoint, 'applepay.paylike.io/token')
+			t.deepEqual(opts, {
+				version: 1,
+				data: {token: '{"foo":"bar"}'},
+				timeout: 10000,
+				clientId: 'js-c-1',
+			})
+			return {
+				first: () => Promise.resolve('foo'),
+			}
+		},
+	})
+	server.applepay.tokenize({foo: 'bar'}).then((r) => t.equal(r, 'foo'))
+})
+
+test('.applepay.approvePaymentSession', (t) => {
+	t.plan(3)
+	const logs = []
+	const server = createServer({
+		request: (endpoint, {log, clock, fetch, ...opts}) => {
+			t.equal(endpoint, 'applepay.paylike.io/approve-payment-session')
+			t.deepEqual(opts, {
+				version: 1,
+				data: {
+					configurationId: 'foo',
+					text: 'bar',
+					validationURL:
+						'https://apple-pay-gateway.apple.com/paymentservices/paymentSession',
+				},
+				timeout: 10000,
+				clientId: 'js-c-1',
+			})
+			return {
+				first: () => Promise.resolve({json: {merchantSession: 'foo'}}),
+			}
+		},
+	})
+	server.applepay
+		.approvePaymentSession('foo', 'bar')
+		.then((r) => t.equal(r, 'foo'))
+})
+
 function createClock(log = () => undefined, start = 1) {
 	let now = start
 	let n = 1

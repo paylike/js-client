@@ -10,22 +10,26 @@ https://github.com/paylike/api-reference. It is using
 [paylike/request](https://www.npmjs.com/package/@paylike/request) under the
 hood.
 
-## Examples
+## Installation
 
 ```sh
 npm install @paylike/client
 ```
 
 ```js
-// Node.js (or anywhere without "fetch")
+// Node.js CJS-style (or anywhere without "fetch")
+// npm install node-fetch@2
 const fetch = require('node-fetch')
-const server = require('@paylike/client')({fetch})
+const paylike = require('@paylike/client')({fetch})
 
-// For a browser environment, "fetch" is "window.fetch"
-const server = require('@paylike/client')()
+// Node.js ESM-style (or anywhere without "fetch")
+import Paylike from '@paylike/client'
+import fetch from 'node-fetch'
+const paylike = Paylike({fetch})
 
-const token = server.tokenize('pcn', '1000000000000000')
-// → Promise
+// Browser environment ("fetch" is "window.fetch")
+import Paylike from '@paylike/client'
+const paylike = Paylike()
 ```
 
 ## Methods
@@ -47,8 +51,8 @@ well as one of the below error classes. All error classes are exposed on the
 main function.
 
 ```js
-const server = require('@paylike/client')()
-server.RateLimitError
+const paylike = require('@paylike/client')()
+paylike.RateLimitError
 ```
 
 - `RateLimitError`
@@ -78,7 +82,7 @@ Pass a log function of the format `(i) => {}` to catch internal (structured)
 logging.
 
 ```js
-const server = require('@paylike/client')({log: console.log})
+const paylike = require('@paylike/client')({log: console.log})
 ```
 
 ## Timeouts and retries
@@ -91,7 +95,7 @@ milliseconds.
 Both of these parameters can be customized:
 
 ```js
-const server = require('@paylike/client')({
+const paylike = require('@paylike/client')({
   timeout: 10000,
   retryAfter: (err, attempts) => {
     // err = current error

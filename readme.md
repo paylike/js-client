@@ -44,6 +44,47 @@ const paylike = Paylike()
 // → Promise<Token>
 ```
 
+### Apple Pay
+
+```js
+.applepay.tokenize(event.payment.token.paymentData[, opts])
+// → Promise<Token>
+.applepay.approvePaymentSession(configurationId, text[, opts])
+// → Promise(merchantSession)
+```
+
+#### Example
+
+```js
+const session = new ApplePaySession(3, {
+  // ...
+})
+session.onvalidatemerchant(() => {
+  paylike.applepay
+    .approvePaymentSession(configurationId, 'Pretty Shop')
+    .then((ms) => session.completeMerchantValidation(ms))
+})
+session.onpaymentauthorized((e) => {
+  paylike.applepay.tokenize(e.payment.token.paymentData).then((token) => {
+    // follow same payment flow as usual
+    pay({
+      // ...
+      applepay: token,
+    }).then(
+      (r) => {
+        session.completePayment(ApplePaySession.STATUS_SUCCESS)
+        // ...
+      },
+      (err) => {
+        session.completePayment(ApplePaySession.STATUS_FAILURE)
+        // ...
+      }
+    )
+  })
+})
+session.begin()
+```
+
 ## Error handling
 
 The methods may throw any error forwarded from the used fetch implementation as

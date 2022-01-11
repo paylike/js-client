@@ -20,6 +20,7 @@ module.exports = (opts = {}) => {
 	const hosts = {
 		api: (opts.hosts && opts.hosts.api) || 'b.paylike.io',
 		vault: (opts.hosts && opts.hosts.vault) || 'vault.paylike.io',
+		applepay: (opts.hosts && opts.hosts.applepay) || 'applepay.paylike.io',
 	}
 	const defaults = {
 		log,
@@ -51,6 +52,27 @@ module.exports = (opts = {}) => {
 					...defaults,
 					...opts,
 				}),
+		},
+		applepay: {
+			tokenize: (paymentData, opts) =>
+				first(`${hosts.applepay}/token`, {
+					version: 1,
+					data: {token: JSON.stringify(paymentData)},
+					...defaults,
+					...opts,
+				}),
+			approvePaymentSession: (configurationId, text, opts) =>
+				first(`${hosts.applepay}/approve-payment-session`, {
+					version: 1,
+					data: {
+						configurationId,
+						text,
+						validationURL:
+							'https://apple-pay-gateway.apple.com/paymentservices/paymentSession',
+					},
+					...defaults,
+					...opts,
+				}).then((r) => r.json.merchantSession),
 		},
 	}
 

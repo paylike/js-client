@@ -1,10 +1,5 @@
 # Paylike API client
 
-_This is an ALPHA release_
-
-Although the functionality included is production quality, the supported scope
-of the API is merely a stub.
-
 High-level client for the API documented at:
 https://github.com/paylike/api-reference. It is using
 [paylike/request](https://www.npmjs.com/package/@paylike/request) under the

@@ -1,10 +1,5 @@
 # Paylike API client
 
-_This is an ALPHA release_
-
-Although the functionality included is production quality, the supported scope
-of the API is merely a stub.
-
 High-level client for the API documented at:
 https://github.com/paylike/api-reference. It is using
 [paylike/request](https://www.npmjs.com/package/@paylike/request) under the
@@ -16,7 +11,7 @@ hood.
 
 ```js
 // swap esm.sh for any "npm CJS to ESM CDN"
-import Paylike from 'https://esm.sh/@paylike/client@0.2.3'
+import Paylike from 'https://esm.sh/@paylike/client@1.0.0'
 
 const paylike = Paylike()
 paylike.tokenize('pcn', '1000000000000000').then(console.log, console.error)

@@ -63,16 +63,11 @@ module.exports = (opts = {}) => {
 				}),
 			approvePaymentSession: (configurationId, text, opts) =>
 				first(`${hosts.applepay}/approve-payment-session`, {
-					version: 1,
-					data: {
-						configurationId,
-						text,
-						validationURL:
-							'https://apple-pay-gateway.apple.com/paymentservices/paymentSession',
-					},
+					version: 2,
+					data: {configurationId, text},
 					...defaults,
 					...opts,
-				}).then((r) => r.json.merchantSession),
+				}),
 		},
 	}
 

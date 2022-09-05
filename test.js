@@ -331,18 +331,16 @@ test('.applepay.approvePaymentSession', (t) => {
 		request: (endpoint, {log, clock, fetch, ...opts}) => {
 			t.equal(endpoint, 'applepay.paylike.io/approve-payment-session')
 			t.deepEqual(opts, {
-				version: 1,
+				version: 2,
 				data: {
 					configurationId: 'foo',
 					text: 'bar',
-					validationURL:
-						'https://apple-pay-gateway.apple.com/paymentservices/paymentSession',
 				},
 				timeout: 10000,
 				clientId: 'js-c-1',
 			})
 			return {
-				first: () => Promise.resolve({json: {merchantSession: 'foo'}}),
+				first: () => Promise.resolve('foo'),
 			}
 		},
 	})
